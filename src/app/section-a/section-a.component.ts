@@ -1,4 +1,4 @@
-import { Component, OnInit,ViewChild } from '@angular/core';
+import { Component, OnInit,ViewChild,ElementRef } from '@angular/core';
 import { FormControl,FormArray} from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { SuccessMsgComponent } from '../success-msg/success-msg.component';
@@ -8,6 +8,7 @@ import { FormService } from '../shared/form.service';
 import { SubmitMsgComponent } from '../submit-msg/submit-msg.component';
 import { Router } from '@angular/router';
 import { UpdateMsgComponent } from '../update-msg/update-msg.component';
+import {jsPDF} from 'jspdf';
 
 
 
@@ -63,11 +64,19 @@ export class SectionAComponent implements OnInit {
 
   signatureImg: string;
   @ViewChild(SignaturePad) signaturePad: SignaturePad;
+  @ViewChild("pdfContent",{static:false}) el!: ElementRef;
+  @ViewChild("pdfContent2",{static:false}) elB!: ElementRef;
+  @ViewChild("pdfContent3",{static:false}) elC!: ElementRef;
+  @ViewChild("pdfContent4",{static:false}) elD!: ElementRef;
+
+
   signaturePadOptions: Object = {
     'minWidth': 2,
     'canvasWidth': 700,
     'canvasHeight': 300
   };
+  arrayBool:boolean= false
+  ultraBool:boolean = false
 
   constructor(private dialog:MatDialog,public formService:FormService,private router:Router) { }
 
@@ -98,6 +107,108 @@ export class SectionAComponent implements OnInit {
   gotSec4(){
     this.step = 4;
   }
+
+  generatePDF(){
+    if (this.step == 1){
+      if (this.formService.Form1.get('sectionA').valid){
+        let pdf = new jsPDF('p','pt','a4')
+
+        pdf.html(this.el.nativeElement,{
+          callback: (pdf) =>{
+            pdf.deletePage(2);
+            pdf.save("sectionA.pdf")
+            this.formService.Form1.get('sectionA').reset()
+            this.step = this.step + 1;
+          },
+          margin:20
+        })
+
+
+      }
+      else{
+        const dialogRef = this.dialog.open(FailureMsgComponent);
+
+        dialogRef.afterClosed().subscribe(result => {
+          console.log(`Dialog result: ${result}`);
+        });
+       console.log(this.formService.Form1.value);
+      }
+    }
+    if (this.step == 2){
+      if (this.formService.Form1.get('sectionB').valid){
+        let pdf = new jsPDF('p','pt','a4')
+
+        pdf.html(this.elB.nativeElement,{
+          callback: (pdf) =>{
+            pdf.deletePage(2);
+            pdf.save("sectionB.pdf")
+            this.formService.Form1.get('sectionB').reset();
+            this.step = this.step + 1;
+          },
+          margin:20
+        })
+      }
+      else{
+        const dialogRef = this.dialog.open(FailureMsgComponent);
+
+        dialogRef.afterClosed().subscribe(result => {
+          console.log(`Dialog result: ${result}`);
+        });
+       console.log(this.formService.Form1.get('sectionB').value);
+      }
+    }
+
+    if (this.step == 3){
+      if (this.formService.Form1.get('sectionC').valid){
+        let pdf = new jsPDF('p','pt','a4')
+
+        pdf.html(this.elC.nativeElement,{
+          callback: (pdf) =>{
+            pdf.deletePage(2);
+            pdf.save("sectionC.pdf")
+            this.formService.Form1.get('sectionC').reset();
+            this.step = this.step + 1;
+          },
+          margin:20
+        })
+      }
+      else{
+        const dialogRef = this.dialog.open(FailureMsgComponent);
+
+        dialogRef.afterClosed().subscribe(result => {
+          console.log(`Dialog result: ${result}`);
+        });
+       console.log(this.formService.Form1.get('sectionC').value);
+      }
+    }
+    if (this.step == 4){
+      if (this.formService.Form1.get('sectionD').valid){
+        let pdf = new jsPDF('p','pt','a4')
+
+        pdf.html(this.elD.nativeElement,{
+          callback: (pdf) =>{
+            pdf.deletePage(2);
+            pdf.save("sectionD.pdf")
+            this.formService.Form1.get('sectionD').reset();
+            this.step = 1;
+          },
+          margin:20
+        })
+      }
+      else{
+        const dialogRef = this.dialog.open(FailureMsgComponent);
+
+        dialogRef.afterClosed().subscribe(result => {
+          console.log(`Dialog result: ${result}`);
+        });
+       console.log(this.formService.Form1.get('sectionD').value);
+      }
+    }
+
+
+
+    }
+
   gotoNext(){
     if (this.step == 1){
       if (this.formService.Form1.get('sectionA').valid){
@@ -220,6 +331,8 @@ export class SectionAComponent implements OnInit {
   onClickultrasound(){
     const a1 = this.formService.Form1.get('sectionB');
     (<FormArray>a1.get('otherProcedure')).removeAt(0)
+    this.ultraBool = true
+    this.arrayBool = false
   }
 
   onClickBtn(){
@@ -228,6 +341,8 @@ export class SectionAComponent implements OnInit {
     if (a2.get('otherProcedure').value.length < 1){
       const a1 = this.formService.Form1.get('sectionB');
       (<FormArray>a1.get('otherProcedure')).push(control);
+      this.arrayBool = a1.get("otherProcedure").value.length === 1
+      this.ultraBool = false
     }
 
   }
